@@ -178,7 +178,7 @@ To exit the application safely:
 | BAGNAN Sonia | [@soniabagnan-commits](https://github.com/soniabagnan-commits) |
 | BAGUEYA Bibata | [@pseudo3](https://github.com/pseudo3) |
 | BALBONE Arielle Naomie | [@pseudo4](https://github.com/pseudo4) |
-| BAKO Alice Carine | [@pseudo5](https://github.com/pseudo5) |
+| BAKO Alice Carine | [@BAKOAlice65](https://github.com/BAKOAlice65) |
 | BATIANA Abdoul Aziz | [@azizbatiana46-cell](https://github.com/azizbatiana46-cell) |
 
 ---
