@@ -1,98 +1,193 @@
 # Py_Project-CS28-Bit-Group1
 # WattaFaso-Manager (V1.3.5)
-## Système de Gestion de Réseau de Distribution d'Eau
+## Water Distribution Network Management System
 
 ---
 
-# 📝 Description du Projet
+# 📝 Project Description
 
-**WattaFaso-Manager** est une application console développée en Python dans le cadre du module *Programming I with Python* au Burkina Institute of Technology (BIT).
+**WattaFaso-Manager** is a console-based application developed in Python as part of the *Programming I with Python* module at the Burkina Institute of Technology (BIT).
 
-Le projet a été conçu comme une solution de gestion simplifiée pour une organisation de distribution d’eau. Il permet de gérer les abonnés, suivre les consommations, automatiser la facturation, gérer les paiements et produire des analyses simples sur le fonctionnement du réseau.
+The project was designed as a simplified management solution for a water distribution organization. It allows users to manage subscribers, monitor water consumption, automate billing, process payments, and generate simple analyses related to network operations.
 
-L’objectif du projet était de développer une application réaliste intégrant les principaux concepts étudiés en Python, notamment :
-- la programmation orientée objet,
-- la gestion de fichiers,
-- les structures de données,
-- les fonctions,
-- les modules,
-- et les bonnes pratiques de développement logiciel.
-
----
-
-# 🚀 Fonctionnalités Principales
-
-## 📋 Gestion des abonnés
-- Ajout de nouveaux abonnés
-- Génération automatique de codes uniques
-- Affichage du registre des abonnés
-- Gestion des abonnés sociaux et commerciaux
-
-## 💧 Gestion des consommations
-- Enregistrement des index de consommation
-- Calcul automatique des consommations
-- Mise à jour des relevés
-
-## 💰 Facturation et Paiements
-- Calcul automatique des factures
-- Gestion des paiements
-- Gestion des impayés
-- Calcul de la monnaie rendue
-
-## ⚠️ Analyse et Surveillance
-- Détection des consommations anormales
-- Système simple d’alerte anti-fraude
-- Tableau de bord logistique
-
-## 💾 Persistance des Données
-- Sauvegarde des données dans des fichiers texte
-- Chargement automatique des abonnés
-- Protection contre certaines erreurs de lecture
+The main objective of the project was to develop a realistic application integrating the major concepts studied in Python, including:
+- object-oriented programming,
+- file handling,
+- data structures,
+- functions,
+- modules,
+- and software development best practices.
 
 ---
 
-# 🛠️ Technologies Utilisées
+# 🚀 Main Features
 
-- **Langage :** Python 3.x
-- **Paradigme :** Programmation Orientée Objet (POO)
-- **Stockage :** Fichiers texte (`.txt`)
-- **Modules utilisés :**
+## 📋 Subscriber Management
+- Add new subscribers
+- Automatic generation of unique subscriber codes
+- Display of subscriber registry
+- Management of social and commercial subscribers
+
+## 💧 Consumption Management
+- Recording consumption meter readings
+- Automatic consumption calculation
+- Updating subscriber records
+
+## 💰 Billing and Payments
+- Automatic invoice calculation
+- Payment management
+- Management of unpaid balances
+- Change calculation
+
+## ⚠️ Monitoring and Analysis
+- Detection of abnormal consumption
+- Simple anti-fraud alert system
+- Logistical dashboard
+
+## 💾 Data Persistence
+- Saving data into text files
+- Automatic subscriber loading
+- Protection against certain file-reading errors
+
+---
+
+# 🛠️ Technologies Used
+
+- **Language:** Python 3.x
+- **Paradigm:** Object-Oriented Programming (OOP)
+- **Storage:** Text files (`.txt`)
+- **Modules Used:**
   - `datetime`
   - `os`
-  - gestion des exceptions Python standard
+  - standard Python exception handling
 
-Le projet respecte les conventions de nommage `snake_case` ainsi que les principales recommandations de style PEP 8.
+The project follows `snake_case` naming conventions and the main PEP 8 style recommendations.
 
 ---
 
-# 📂 Structure du Projet
+# 📂 Project Structure
 
 ```text
 WattaFaso-Manager/
 │
-├── main.py
-├── models.py
-├── database.py
-├── operations.py
-├── services.py
-├── config.py
+├── README.md                
+├── main.py                  
 │
-└── données/
-    ├── abonnés.txt
-    └── historique.txt
+├── data/                    
+│   ├── __init__.py          
+│   ├── abonnés.txt
+│   └── historique.txt
+│
+├── models/                  
+│   ├── __init__.py          
+│   └── models.py
+│
+├── services/              
+│   ├── __init__.py          
+│   ├── services.py
+│   └── operations.py
+│
+└── utils/                   
+    ├── __init__.py          
+    ├── database.py
+    └── config.py
 ```
 
-## Description des fichiers
+## File Description
 
-| Fichier | Rôle |
+| File | Role |
 |---|---|
-| `main.py` | Point d’entrée principal du programme |
-| `models.py` | Définition des classes et logique orientée objet |
-| `database.py` | Sauvegarde et chargement des données |
-| `operations.py` | Gestion des opérations métiers |
-| `services.py` | Services analytiques et tableau de bord |
-| `config.py` | Constantes et paramètres du système |
+| `main.py` | Main entry point of the application |
+| `models.py` | Definition of classes and object-oriented logic |
+| `database.py` | Data saving and loading management |
+| `operations.py` | Business operations management |
+| `services.py` | Analytical services and dashboard |
+| `config.py` | System constants and configuration parameters |
+| `__init__.py` | Allows folders to be treated as importable Python packages |
 
 ---
 
-# 📐 Architecture Orientée Objet (POO)
+# 📐 Object-Oriented Architecture (OOP)
+
+The project applies the four fundamental principles of object-oriented programming.
+
+## 1. Encapsulation
+Sensitive object data is protected using private attributes and manipulated through dedicated methods.
+
+## 2. Abstraction
+Internal complexity is hidden behind simple methods to provide a clear and user-friendly system.
+
+## 3. Inheritance
+A parent class named `Abonne` is used to centralize shared behaviors.
+
+Two specialized classes inherit from this parent class:
+- `AbonneSocial`
+- `AbonneCommercial`
+
+## 4. Polymorphism
+The `calculer_facture()` method is redefined in each class to apply different billing rules depending on the subscriber type.
+
+---
+
+# 📋 Data Structures Used
+
+The project uses several Python data structures in meaningful ways:
+
+## 📘 Dictionaries
+The main subscriber registry is stored in a dictionary, allowing fast access using subscriber codes.
+
+## 📗 Lists
+Lists are used for temporary storage of alerts and analysis reports.
+
+## 📙 Tuples
+Tuples are used to store immutable constants and billing parameters.
+
+---
+
+# 💻 How to Run the Project
+
+## 1. Install Python
+Make sure Python 3 is installed on your machine.
+
+## 2. Download the Project
+Clone or download the GitHub repository.
+
+## 3. Open a Terminal
+Navigate to the project root directory.
+
+## 4. Run the Application
+
+```bash
+python main.py
+```
+
+## 5. Usage
+Use the menu options to navigate through the system.
+
+To exit the application safely:
+- use the dedicated exit option,
+- or press `Ctrl + C`.
+
+---
+
+# 👨‍💻 Project Team
+
+| Member | GitHub |
+|---|---|
+| AKPATSI Kossi Magloire | [@espoirbravado-rgb](https://github.com/azizbatiana46-cell) |
+| BAGNAN Sonia | [@pseudo2](https://github.com/pseudo2) |
+| BAGUEYA Bibata | [@pseudo3](https://github.com/pseudo3) |
+| BALBONE Arielle Naomie | [@pseudo4](https://github.com/pseudo4) |
+| BAKO Alice Carine | [@pseudo5](https://github.com/pseudo5) |
+| BATIANA Abdoul Aziz | [@azizbatiana46-cell](https://github.com/azizbatiana46-cell) |
+
+---
+
+# 👥 Acknowledgements
+
+This project was carried out in an academic context at the Burkina Institute of Technology (BIT) for learning purposes related to:
+- Python software development,
+- object-oriented programming,
+- and project management using Git and GitHub.
+
+Special thanks to the teaching staff for their technical guidance and project supervision.
