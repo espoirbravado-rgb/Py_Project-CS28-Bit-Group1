@@ -78,3 +78,84 @@ class Abonne:
 
     def modifier_nouvel_index(self, valeur_index):
         """Met à jour le nouvel index après vérification de cohérence
+        Sécurité Interne : Empêche l'enregistrement d'une consommation négative.
+
+        Arguments:
+            valeur_index (int): La nouvelle valeur lue sur le compteur.
+
+        Retour:
+            bool: True si la mise à jour est valide, False sinon.
+        """
+        if valeur_index >= self._ancien_index:
+            self._nouvel_index = valeur_index
+            return True
+        return False
+
+    def calculer_consommation(self):
+        """Calcule le volume consommé entre les deux index.
+
+        Retour:
+            int: Le volume de consommation net.
+        """
+        return self._nouvel_index - self._ancien_index
+
+    def cloturer_periode_index(self):
+        """Applique la bascule automatique des index pour le mois suivant."""
+        self._ancien_index = self._nouvel_index
+
+    def calculer_facture(self):
+        """Calcule le montant de la facture (méthode générique).
+
+        EXIGENCE POO : Destinée à être surchargée par les classes filles.
+
+        Retour:
+            float: 0.0 pour la classe de base.
+        """
+        return 0.0
+
+
+class AbonneSocial(Abonne):
+    """Classe représentant un abonné soumis au tarif social domestique."""
+
+    def calculer_facture(self):
+        """Calcule la facture sociale basée sur le volume et la dette ancienne.
+
+        DEMONSTRATION DU POLYMORPHISME : Surcharge de la méthode parent.
+        EXIGENCE BIT (TUPLE) : Extraction des données depuis un tuple de constante.
+
+        Retour:
+            float: Le montant total dû en Francs CFA.
+        """
+        # Création et exploitation d'un tuple immuable pour sécuriser le calcul
+        donnees_calcul_social = (self.calculer_consommation(), config.TARIF_SOCIAL)
+        
+        volume_consomme = donnees_calcul_social[0]
+        prix_unitaire = donnees_calcul_social[1]
+        
+        montant_mois = volume_consomme * prix_unitaire
+        return montant_mois + self._solde_impaye
+
+
+class AbonneCommercial(Abonne):
+    """Classe représentant un abonné soumis au tarif commercial."""
+
+    def calculer_facture(self):
+        """Calcule la facture commerciale avec taxe fixe de maintenance.
+
+        DEMONSTRATION DU POLYMORPHISME : Surcharge de la méthode parent.
+        EXIGENCE BIT (TUPLE) : Utilisation d'un tuple pour regrouper les paramètres.
+
+        Retour:
+            float: Le montant total dû en Francs CFA.
+        """
+        # Regroupement des constantes de facturation dans un tuple structurel
+        parametres_facturation = (config.TARIF_COMMERCIAL, config.TAXE_MAINTENANCE)
+        
+        tarif_unitaire = parametres_facturation[0]
+        taxe_fixe = parametres_facturation[1]
+        
+        volume_consomme = self.calculer_consommation()
+        montant_mois = (volume_consomme * tarif_unitaire) + taxe_fixe
+        return montant_mois + self._solde_impaye
+
+#  FIN DU CODE DE MODELS.PY VERROUILLÉ
