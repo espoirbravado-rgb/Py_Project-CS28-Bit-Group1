@@ -27,7 +27,6 @@ def charger_base_de_donnees():
                 ligne_nettoyee = ligne.strip()
                 if not ligne_nettoyee:
                     continue
-                    
                 segments = ligne_nettoyee.split(";")
                 
                 # CORRECTION CRITIQUE C : Validation explicite de la structure
@@ -61,5 +60,46 @@ def charger_base_de_donnees():
                         print(
                             "Avertissement Ligne " + str(numero_ligne) 
                             + " : Type d'abonné inconnu '" + str(type_client) + "'."
-                        )
-                        
+                        )         
+       except ValueError:
+                    print("Erreur Ligne " + str(numero_ligne) + " : Données numériques corrompues.")
+                    continue
+                    
+    except FileNotFoundError:
+        print("Remarque : Fichier de stockage introuvable. Il sera créé automatiquement.")
+        
+    return dictionnaire_clients
+
+
+def sauvegarder_base_de_donnees(dictionnaire_clients):
+    """Enregistre l'état actuel du dictionnaire dans le fichier de stockage.
+
+    Arguments:
+        dictionnaire_clients (dict): Le dictionnaire des abonnés en mémoire.
+    """
+    try:
+        with open(config.CHEMIN_STOCK, "w", encoding="utf-8") as fichier:
+            for cle in dictionnaire_clients:
+                client = dictionnaire_clients[cle]
+                
+                if isinstance(client, models.AbonneSocial):
+                    etiquette = "SOCIAL"
+                elif isinstance(client, models.AbonneCommercial):
+                    etiquette = "COMMERCIAL"
+                else:
+                    continue
+                    
+                ligne = (
+                    etiquette + ";"
+                    + client.obtenir_code() + ";"
+                    + client.obtenir_nom() + ";"
+                    + str(client.obtenir_ancien_index()) + ";"
+                    + str(client.obtenir_nouvel_index()) + ";"
+                    + str(client.obtenir_solde()) + "\n"
+                )
+                fichier.write(ligne)
+                
+    except IOError:
+        print("Erreur critique : Impossible d'écrire les données sur le disque.")
+
+#  FIN DU CODE DE DATABASE.PY
