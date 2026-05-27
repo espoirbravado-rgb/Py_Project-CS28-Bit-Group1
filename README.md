@@ -75,8 +75,8 @@ WattaFaso-Manager/
 │
 ├── data/                    
 │   ├── __init__.py          
-│   ├── abonnés.txt
-│   └── historique.txt
+│   ├── subscribed.txt
+│   └── history.txt
 │
 ├── models/                  
 │   ├── __init__.py          
