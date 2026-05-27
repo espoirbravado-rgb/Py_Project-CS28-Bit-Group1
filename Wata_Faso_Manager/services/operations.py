@@ -97,3 +97,37 @@ def executer_session_releve_et_caisse(dictionnaire_clients, fonction_saisie_secu
         
         nouveau_releve = fonction_saisie_securisee("Entrez la valeur du nouvel index lu : ")
         
+        # Utilisation stricte du setter pour l'encapsulation
+        if not client_actif.modifier_nouvel_index(nouveau_releve):
+            print("Erreur : L'index saisi est inférieur à l'ancien index.")
+            continue
+            
+        volume = client_actif.calculer_consommation()
+        montant_total_du = client_actif.calculer_facture()
+        
+        print("Montant total à payer (incluant les impayés) : " + str(montant_total_du) + " F CFA.")
+        montant_verse = fonction_saisie_securisee("Entrez le montant versé au guichet : ")
+        
+        # Gestion sécurisée du recouvrement et du report de dette
+        reste_a_payer = montant_total_du - montant_verse
+        if reste_a_payer < 0:
+            print("Le système rend la monnaie : " + str(abs(reste_a_payer)) + " Francs CFA.")
+            client_actif.modifier_solde(0)
+        else:
+            client_actif.modifier_solde(reste_a_payer)
+            if reste_a_payer > 0:
+                print("Note : Un solde impayé de " + str(reste_a_payer) + " F sera reporté.")
+                
+        # Bascule automatique du cycle de l'index
+        client_actif.cloturer_periode_index()
+        
+        # Mémorisation de la transaction pour le rapport de caisse
+        ligne_facture = (client_actif, volume, montant_verse)
+        panier_factures.append(ligne_facture)
+        
+        reponse = input("Voulez-vous traiter un autre abonné ? (OUI/NON) : ").strip()
+        continuer_saisie = reponse.upper()
+        
+    return panier_factures
+
+#  FIN DU CODE DE OPERATIONS.PY
