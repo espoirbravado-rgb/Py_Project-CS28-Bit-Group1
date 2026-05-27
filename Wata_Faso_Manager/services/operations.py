@@ -43,3 +43,57 @@ def inscrire_nouvel_abonne(dictionnaire_clients):
     # Amélioration D : Extraction dynamique de l'année en cours
     annee_actuelle = str(datetime.now().year)
     
+    # Amélioration C : Algorithme de recherche du numéro maximum pour éviter les doublons
+    max_numero = 0
+    for cle in dictionnaire_clients:
+        # Un code valide ressemble à "SOC-2026-003"
+        segments = cle.split("-")
+        if len(segments) == 3 and segments[0] == prefixe and segments[1] == annee_actuelle:
+            try:
+                numero_extrait = int(segments[2])
+                if numero_extrait > max_numero:
+                    max_numero = numero_extrait
+            except ValueError:
+                continue
+                
+    numero_sequentiel = max_numero + 1
+    code_unique = prefixe + "-" + annee_actuelle + "-" + str(numero_sequentiel).zfill(3)
+    
+    # Création de l'objet avec des index et un solde initialisés à zéro
+    if prefixe == "SOC":
+        nouveau_client = models.AbonneSocial(code_unique, nom_saisi, 0, 0, 0)
+    else:
+        nouveau_client = models.AbonneCommercial(code_unique, nom_saisi, 0, 0, 0)
+        
+    dictionnaire_clients[code_unique] = nouveau_client
+    print("Succès : Enregistrement effectué par le système.")
+    print("Code unique généré par la machine : " + code_unique)
+
+
+def executer_session_releve_et_caisse(dictionnaire_clients, fonction_saisie_securisee):
+    """Gère la saisie des index de consommation et l'encaissement financier.
+
+    Arguments:
+        dictionnaire_clients (dict): Le dictionnaire des abonnés du réseau.
+        fonction_saisie_securisee (function): La fonction de validation numérique.
+
+    Retour:
+        list: Une liste de tuples contenant les transactions validées de la session.
+    """
+    panier_factures = []
+    continuer_saisie = "OUI"
+    
+    while continuer_saisie == "OUI":
+        print("\n--- MISE À ZONE ET ENCAISSEMENT ---")
+        code_saisi = input("Entrez le code unique de l'abonné : ").strip()
+        
+        if code_saisi not in dictionnaire_clients:
+            print("Erreur : Ce code n'existe pas dans le réseau.")
+            continue
+            
+        client_actif = dictionnaire_clients[code_saisi]
+        print("Client trouvé : " + client_actif.obtenir_nom())
+        print("Dette antérieure : " + str(client_actif.obtenir_solde()) + " F CFA.")
+        
+        nouveau_releve = fonction_saisie_securisee("Entrez la valeur du nouvel index lu : ")
+        
