@@ -1,9 +1,9 @@
-# CODE PYTHON DU FICHIER DATABASE.PY SÉCURISÉ ET BLINDÉ
+# SECURE AND HARDENED DATABASE.PY PYTHON CODE
 
-"""Module de gestion de la persistance des données pour WattaFaso-Manager.
+"""Data persistence management module for WattaFaso-Manager.
 
-Ce module gère la lecture et l'écriture du registre avec une validation 
-stricte du nombre de colonnes pour empêcher les crashs de type IndexError.
+This module handles reading and writing the registry with strict 
+column validation to prevent IndexError-type crashes.
 """
 
 import config
@@ -11,13 +11,13 @@ import models
 
 
 def charger_base_de_donnees():
-    """Charge le registre des abonnés depuis le fichier de stockage textuel.
+    """Loads the subscriber registry from the text storage file.
 
-    Sécurité interne : Valide explicitement la structure en 6 colonnes de chaque
-    ligne avant d'accéder aux données, évitant les crashs sur fichier altéré.
+    Internal security: Explicitly validates the 6-column structure of each
+    line before accessing data, avoiding crashes on corrupted files.
 
-    Retour:
-        dict: Le dictionnaire des objets abonnés indexés par leur code unique.
+    Returns:
+        dict: The dictionary of subscriber objects indexed by their unique code.
     """
     dictionnaire_clients = {}
     
@@ -27,14 +27,15 @@ def charger_base_de_donnees():
                 ligne_nettoyee = ligne.strip()
                 if not ligne_nettoyee:
                     continue
+                    
                 segments = ligne_nettoyee.split(";")
                 
-                # CORRECTION CRITIQUE C : Validation explicite de la structure
+                # CRITICAL FIX C: Explicit structure validation
                 if len(segments) != 6:
                     print(
-                        "Erreur Ligne " + str(numero_ligne) 
-                        + " : Structure invalide (" + str(len(segments)) 
-                        + "/6 colonnes). Ligne ignorée."
+                        "Error Line " + str(numero_ligne) 
+                        + " : Invalid structure (" + str(len(segments)) 
+                        + "/6 columns). Line ignored."
                     )
                     continue
                     
@@ -58,24 +59,25 @@ def charger_base_de_donnees():
                         dictionnaire_clients[identifiant] = client_objet
                     else:
                         print(
-                            "Avertissement Ligne " + str(numero_ligne) 
-                            + " : Type d'abonné inconnu '" + str(type_client) + "'."
-                        )         
-       except ValueError:
-                    print("Erreur Ligne " + str(numero_ligne) + " : Données numériques corrompues.")
+                            "Warning Line " + str(numero_ligne) 
+                            + " : Unknown subscriber type '" + str(type_client) + "'."
+                        )
+                        
+                except ValueError:
+                    print("Error Line " + str(numero_ligne) + " : Corrupted numerical data.")
                     continue
                     
     except FileNotFoundError:
-        print("Remarque : Fichier de stockage introuvable. Il sera créé automatiquement.")
+        print("Note: Storage file not found. It will be created automatically.")
         
     return dictionnaire_clients
 
 
 def sauvegarder_base_de_donnees(dictionnaire_clients):
-    """Enregistre l'état actuel du dictionnaire dans le fichier de stockage.
+    """Saves the current state of the dictionary to the storage file.
 
     Arguments:
-        dictionnaire_clients (dict): Le dictionnaire des abonnés en mémoire.
+        dictionnaire_clients (dict): The dictionary of subscribers in memory.
     """
     try:
         with open(config.CHEMIN_STOCK, "w", encoding="utf-8") as fichier:
@@ -100,6 +102,6 @@ def sauvegarder_base_de_donnees(dictionnaire_clients):
                 fichier.write(ligne)
                 
     except IOError:
-        print("Erreur critique : Impossible d'écrire les données sur le disque.")
+        print("Critical error: Unable to write data to disk.")
 
-#  FIN DU CODE DE DATABASE.PY
+#  END OF DATABASE.PY CODE
