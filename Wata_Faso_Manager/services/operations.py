@@ -1,134 +1,254 @@
-#  CODE PYTHON DU FICHIER OPERATIONS.PY SÉCURISÉ ET STABILISÉ
+# SECURED AND STABILIZED PYTHON CODE FOR OPERATIONS.PY
 
-"""Module des opérations de guichet et de terrain pour WattaFaso-Manager.
-
-Ce module gère les procédures d'auto-inscription avec identifiants uniques 
-dynamiques et l'enregistrement sécurisé des sessions de relevés d'index.
-"""
+"""Field and counter operations module for WattaFaso-Manager."""
 
 from datetime import datetime
-import models
+from models import models
 
 
-def inscrire_nouvel_abonne(dictionnaire_clients):
-    """Inscrit un nouvel abonné avec un identifiant unique garanti sans doublon.
+def register_new_subscriber(client_dictionary):
+    """Registers a new subscriber with a guaranteed unique ID."""
 
-    Sécurité interne : Détermine l'année actuelle dynamiquement et calcule le 
-    numéro séquentiel basé sur le plus grand identifiant existant pour éviter 
-    toute collision de clés en cas de suppressions antérieures.
+    print("\n--- AUTOMATIC SUBSCRIPTION ASSIGNMENT ---")
 
-    Arguments:
-        dictionnaire_clients (dict): Le registre des abonnés en mémoire vive.
-    """
-    print("\n--- ATTRIBUTION AUTOMATIQUE D'UN ABONNEMENT ---")
-    nom_saisi = input("Entrez le nom complet du nouveau client : ").strip()
-    
-    if not nom_saisi:
-        print("Erreur : Le nom ne peut pas être vide. Annulation.")
+    entered_name = input(
+        "Enter the full name of the new client: "
+    ).strip()
+
+    if not entered_name:
+
+        print(
+            "Error: Name cannot be empty. Operation cancelled."
+        )
+
         return
 
-    print("Choisissez le profil tarifaire :")
-    print("1. Profil Social (Ménages)")
-    print("2. Profil Commercial (Boutiques/Ateliers)")
-    choix = input("Votre choix (1 ou 2) : ").strip()
-    
-    if choix == "1":
-        prefixe = "SOC"
-    elif choix == "2":
-        prefixe = "COM"
+    print("Choose the pricing profile:")
+    print("1. Social Profile (Households)")
+    print("2. Commercial Profile (Shops/Workshops)")
+
+    choice = input(
+        "Your choice (1 or 2): "
+    ).strip()
+
+    if choice == "1":
+
+        prefix = "SOC"
+
+    elif choice == "2":
+
+        prefix = "COM"
+
     else:
-        print("Erreur : Choix invalide. Annulation de la procédure.")
+
+        print(
+            "Error: Invalid choice. Procedure cancelled."
+        )
+
         return
-        
-    # Amélioration D : Extraction dynamique de l'année en cours
-    annee_actuelle = str(datetime.now().year)
-    
-    # Amélioration C : Algorithme de recherche du numéro maximum pour éviter les doublons
-    max_numero = 0
-    for cle in dictionnaire_clients:
-        # Un code valide ressemble à "SOC-2026-003"
-        segments = cle.split("-")
-        if len(segments) == 3 and segments[0] == prefixe and segments[1] == annee_actuelle:
+
+    # Improvement D:
+    # Dynamic extraction of the current year
+    current_year = str(datetime.now().year)
+
+    # Improvement C:
+    # Search algorithm for maximum number
+    # to avoid duplicate IDs
+    max_number = 0
+
+    for key in client_dictionary:
+
+        # Valid code example:
+        # SOC-2026-003
+
+        segments = key.split("-")
+
+        if (
+            len(segments) == 3
+            and segments[0] == prefix
+            and segments[1] == current_year
+        ):
+
             try:
-                numero_extrait = int(segments[2])
-                if numero_extrait > max_numero:
-                    max_numero = numero_extrait
+
+                extracted_number = int(segments[2])
+
+                if extracted_number > max_number:
+
+                    max_number = extracted_number
+
             except ValueError:
+
                 continue
-                
-    numero_sequentiel = max_numero + 1
-    code_unique = prefixe + "-" + annee_actuelle + "-" + str(numero_sequentiel).zfill(3)
-    
-    # Création de l'objet avec des index et un solde initialisés à zéro
-    if prefixe == "SOC":
-        nouveau_client = models.AbonneSocial(code_unique, nom_saisi, 0, 0, 0)
+
+    sequential_number = max_number + 1
+
+    unique_code = (
+        prefix
+        + "-"
+        + current_year
+        + "-"
+        + str(sequential_number).zfill(3)
+    )
+
+    # Object creation with indexes
+    # and balance initialized to zero
+    if prefix == "SOC":
+
+        new_client = models.SocialSubscriber(
+            unique_code,
+            entered_name,
+            0,
+            0,
+            0
+        )
+
     else:
-        nouveau_client = models.AbonneCommercial(code_unique, nom_saisi, 0, 0, 0)
-        
-    dictionnaire_clients[code_unique] = nouveau_client
-    print("Succès : Enregistrement effectué par le système.")
-    print("Code unique généré par la machine : " + code_unique)
+
+        new_client = models.CommercialSubscriber(
+            unique_code,
+            entered_name,
+            0,
+            0,
+            0
+        )
+
+    client_dictionary[unique_code] = new_client
+
+    print(
+        "Success: Registration completed by the system."
+    )
+
+    print(
+        "Machine-generated unique code: "
+        + unique_code
+    )
 
 
-def executer_session_releve_et_caisse(dictionnaire_clients, fonction_saisie_securisee):
-    """Gère la saisie des index de consommation et l'encaissement financier.
+def execute_meter_and_payment_session(
+    client_dictionary,
+    secure_input_function
+):
+    """Handles meter reading updates and payment collection."""
 
-    Arguments:
-        dictionnaire_clients (dict): Le dictionnaire des abonnés du réseau.
-        fonction_saisie_securisee (function): La fonction de validation numérique.
+    invoice_cart = []
 
-    Retour:
-        list: Une liste de tuples contenant les transactions validées de la session.
-    """
-    panier_factures = []
-    continuer_saisie = "OUI"
-    
-    while continuer_saisie == "OUI":
-        print("\n--- MISE À ZONE ET ENCAISSEMENT ---")
-        code_saisi = input("Entrez le code unique de l'abonné : ").strip()
-        
-        if code_saisi not in dictionnaire_clients:
-            print("Erreur : Ce code n'existe pas dans le réseau.")
+    continue_input = "YES"
+
+    while continue_input == "YES":
+
+        print(
+            "\n--- METER UPDATE AND PAYMENT COLLECTION ---"
+        )
+
+        entered_code = input(
+            "Enter the subscriber unique code: "
+        ).strip()
+
+        if entered_code not in client_dictionary:
+
+            print(
+                "Error: This code does not exist "
+                "in the network."
+            )
+
             continue
-            
-        client_actif = dictionnaire_clients[code_saisi]
-        print("Client trouvé : " + client_actif.obtenir_nom())
-        print("Dette antérieure : " + str(client_actif.obtenir_solde()) + " F CFA.")
-        
-        nouveau_releve = fonction_saisie_securisee("Entrez la valeur du nouvel index lu : ")
-        
-        # Utilisation stricte du setter pour l'encapsulation
-        if not client_actif.modifier_nouvel_index(nouveau_releve):
-            print("Erreur : L'index saisi est inférieur à l'ancien index.")
+
+        active_client = client_dictionary[entered_code]
+
+        print(
+            "Client found: "
+            + active_client.get_name()
+        )
+
+        print(
+            "Previous unpaid balance: "
+            + str(active_client.get_balance())
+            + " CFA Francs."
+        )
+
+        new_reading = secure_input_function(
+            "Enter the new meter index value: "
+        )
+
+        # Strict use of setter for encapsulation
+        if not active_client.update_current_index(
+            new_reading
+        ):
+
+            print(
+                "Error: The entered index is lower "
+                "than the previous index."
+            )
+
             continue
-            
-        volume = client_actif.calculer_consommation()
-        montant_total_du = client_actif.calculer_facture()
-        
-        print("Montant total à payer (incluant les impayés) : " + str(montant_total_du) + " F CFA.")
-        montant_verse = fonction_saisie_securisee("Entrez le montant versé au guichet : ")
-        
-        # Gestion sécurisée du recouvrement et du report de dette
-        reste_a_payer = montant_total_du - montant_verse
-        if reste_a_payer < 0:
-            print("Le système rend la monnaie : " + str(abs(reste_a_payer)) + " Francs CFA.")
-            client_actif.modifier_solde(0)
+
+        volume = active_client.calculate_consumption()
+
+        total_amount_due = (
+            active_client.calculate_bill()
+        )
+
+        print(
+            "Total amount to pay "
+            "(including unpaid balance): "
+            + str(total_amount_due)
+            + " CFA Francs."
+        )
+
+        paid_amount = secure_input_function(
+            "Enter the amount paid at the counter: "
+        )
+
+        # Secure debt management
+        remaining_balance = (
+            total_amount_due - paid_amount
+        )
+
+        if remaining_balance < 0:
+
+            print(
+                "The system returns change: "
+                + str(abs(remaining_balance))
+                + " CFA Francs."
+            )
+
+            active_client.update_balance(0)
+
         else:
-            client_actif.modifier_solde(reste_a_payer)
-            if reste_a_payer > 0:
-                print("Note : Un solde impayé de " + str(reste_a_payer) + " F sera reporté.")
-                
-        # Bascule automatique du cycle de l'index
-        client_actif.cloturer_periode_index()
-        
-        # Mémorisation de la transaction pour le rapport de caisse
-        ligne_facture = (client_actif, volume, montant_verse)
-        panier_factures.append(ligne_facture)
-        
-        reponse = input("Voulez-vous traiter un autre abonné ? (OUI/NON) : ").strip()
-        continuer_saisie = reponse.upper()
-        
-    return panier_factures
 
-#  FIN DU CODE DE OPERATIONS.PY
+            active_client.update_balance(
+                remaining_balance
+            )
 
+            if remaining_balance > 0:
+
+                print(
+                    "Notice: An unpaid balance of "
+                    + str(remaining_balance)
+                    + " CFA Francs will be carried over."
+                )
+
+        # Automatic index cycle rollover
+        active_client.close_index_period()
+
+        # Store transaction for cash report
+        invoice_line = (
+            active_client,
+            volume,
+            paid_amount
+        )
+
+        invoice_cart.append(invoice_line)
+
+        response = input(
+            "Do you want to process another subscriber? "
+            "(YES/NO): "
+        ).strip()
+
+        continue_input = response.upper()
+
+    return invoice_cart
+
+
+# END OF OPERATIONS.PY CODE
