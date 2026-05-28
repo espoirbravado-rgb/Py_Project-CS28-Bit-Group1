@@ -177,7 +177,7 @@ To exit the application safely:
 | AKPATSI Kossi Magloire | [@espoirbravado-rgb](https://github.com/espoirbravado-rgb) |
 | BAGNAN Sonia | [@soniabagnan-commits](https://github.com/soniabagnan-commits) |
 | BAGUEYA Bibata | [@pseudo3](https://github.com/pseudo3) |
-| BALBONE Arielle Naomie | [@pseudo4](https://github.com/pseudo4) |
+| BALBONE Arielle Naomie | [@ariellebalbone-hash](https://github.com/ariellebalbone-hash) |
 | BAKO Alice Carine | [@BAKOAlice65](https://github.com/BAKOAlice65) |
 | BATIANA Abdoul Aziz | [@azizbatiana46-cell](https://github.com/azizbatiana46-cell) |
 
