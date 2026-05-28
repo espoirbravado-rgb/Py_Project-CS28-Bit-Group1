@@ -1,161 +1,118 @@
-# CODE PYTHON DU FICHIER MODELS.PY CONFORME CAHIER DES CHARGES BIT
+#  MODELS.PY 
 
-"""Module de modélisation des profils d'abonnés du réseau WattaFaso-Manager.
+"""Subscriber profile modeling module for the WattaFaso-Manager network."""
 
-Ce module contient la classe de base Abonne ainsi que les classes enfants
-AbonneSocial et AbonneCommercial appliquant l'encapsulation et le polymorphisme.
-"""
-
-import config
+from utils  import config
 
 
-class Abonne:
-    """Classe abstraite/générique représentant un abonné du réseau."""
+class Subscriber:
+    """ class representing a network subscriber."""
 
-    def __init__(self, code, nom, index_precedent, index_actuel, solde_initial=0):
-        """Initialise un nouvel abonné avec ses index et son solde d'impayés.
-
-        Arguments:
-            code (str): Le code unique d'identification.
-            nom (str): Le nom complet du client.
-            index_precedent (int): L'index de consommation du mois passé.
-            index_actuel (int): Le nouvel index relevé sur le compteur.
-            solde_initial (float): La dette initiale du client (0 par défaut).
+    def __init__(self, code, name, previous_index, current_index, initial_balance=0):
+        """Initializes a new subscriber with indexes and unpaid balance.
         """
         self._code = code
-        self._nom = nom
-        self._ancien_index = index_precedent
-        self._nouvel_index = index_actuel
-        self._solde_impaye = solde_initial
+        self._name = name
+        self._previous_index = previous_index
+        self._current_index = current_index
+        self._unpaid_balance = initial_balance
 
-    def obtenir_code(self):
-        """Retourne le code unique de l'abonné.
+    def get_code(self):
+        """Returns the subscriber unique code.
 
-        Retour:
-            str: Le code d'identification.
+        Return:
+            str: Identification code.
         """
         return self._code
 
-    def obtenir_nom(self):
-        """Retourne le nom complet de l'abonné.
-
-        Retour:
-            str: Le nom du client.
+    def get_name(self):
+        """Returns the subscriber full name.
         """
-        return self._nom
+        return self._name
 
-    def obtenir_ancien_index(self):
-        """Retourne l'ancien index de consommation.
-
-        Retour:
-            int: L'index précédent.
+    def get_previous_index(self):
+        """Returns the previous consumption index.
         """
-        return self._ancien_index
+        return self._previous_index
 
-    def obtenir_nouvel_index(self):
-        """Retourne le nouvel index de consommation.
+    def get_current_index(self):
+        """Returns the current consumption index."""
+        return self._current_index
 
-        Retour:
-            int: L'index actuel.
-        """
-        return self._nouvel_index
+    def get_balance(self):
+        """Returns the subscriber unpaid balance. """
+        return self._unpaid_balance
 
-    def obtenir_solde(self):
-        """Retourne le solde des impayés du client.
+    def update_balance(self, amount):
+        """Updates the unpaid balance."""
+        self._unpaid_balance = amount
 
-        Retour:
-            float: Le montant de la dette restante.
-        """
-        return self._solde_impaye
+    def update_current_index(self, index_value):
+        """Updates the current index after validation."""
 
-    def modifier_solde(self, montant):
-        """Met à jour le solde des impayés avec un nouveau montant.
-
-        Arguments:
-            montant (float): Le nouveau reste à payer.
-        """
-        self._solde_impaye = montant
-
-    def modifier_nouvel_index(self, valeur_index):
-        """Met à jour le nouvel index après vérification de cohérence
-        Sécurité Interne : Empêche l'enregistrement d'une consommation négative.
-
-        Arguments:
-            valeur_index (int): La nouvelle valeur lue sur le compteur.
-
-        Retour:
-            bool: True si la mise à jour est valide, False sinon.
-        """
-        if valeur_index >= self._ancien_index:
-            self._nouvel_index = valeur_index
+        if index_value >= self._previous_index:
+            self._current_index = index_value
             return True
         return False
 
-    def calculer_consommation(self):
-        """Calcule le volume consommé entre les deux index.
+    def calculate_consumption(self):
+        """Calculates consumption volume between indexes."""
+        return self._current_index - self._previous_index
 
-        Retour:
-            int: Le volume de consommation net.
-        """
-        return self._nouvel_index - self._ancien_index
+    def close_index_period(self):
+        """Automatically shifts indexes for the next month."""
+        self._previous_index = self._current_index
 
-    def cloturer_periode_index(self):
-        """Applique la bascule automatique des index pour le mois suivant."""
-        self._ancien_index = self._nouvel_index
+    def calculate_bill(self):
+        """Calculates bill amount (generic method).
 
-    def calculer_facture(self):
-        """Calcule le montant de la facture (méthode générique).
-
-        EXIGENCE POO : Destinée à être surchargée par les classes filles.
-
-        Retour:
-            float: 0.0 pour la classe de base.
         """
         return 0.0
 
 
-class AbonneSocial(Abonne):
-    """Classe représentant un abonné soumis au tarif social domestique."""
+class SocialSubscriber(Subscriber):
+    """Class representing a subscriber under social domestic pricing."""
 
-    def calculer_facture(self):
-        """Calcule la facture sociale basée sur le volume et la dette ancienne.
+    def calculate_bill(self):
+        """Calculates social bill based on consumption and previous debt."""
 
-        DEMONSTRATION DU POLYMORPHISME : Surcharge de la méthode parent.
-        EXIGENCE BIT (TUPLE) : Extraction des données depuis un tuple de constante.
+        # Immutable tuple used to secure calculations
+        social_calculation_data = (
+            self.calculate_consumption(),
+            config.SOCIAL_RATE
+        )
 
-        Retour:
-            float: Le montant total dû en Francs CFA.
-        """
-        # Création et exploitation d'un tuple immuable pour sécuriser le calcul
-        donnees_calcul_social = (self.calculer_consommation(), config.TARIF_SOCIAL)
+        consumed_volume = social_calculation_data[0]
+        unit_price = social_calculation_data[1]
+
+        monthly_amount = consumed_volume * unit_price
+
+        return monthly_amount + self._unpaid_balance
+
+
+class CommercialSubscriber(Subscriber):
+    """Class representing a subscriber under commercial pricing."""
+
+    def calculate_bill(self):
+        """Calculates commercial bill with fixed maintenance tax."""
+
+        # Grouping billing constants in a structural tuple
+        billing_parameters = (
+            config.COMMERCIAL_RATE,
+            config.MAINTENANCE_TAX
+        )
+
+        unit_rate = billing_parameters[0]
+        fixed_tax = billing_parameters[1]
+
+        consumed_volume = self.calculate_consumption()
+
+        monthly_amount = (
+            consumed_volume * unit_rate
+        ) + fixed_tax
+
+        return monthly_amount + self._unpaid_balance
+
+
+# END OF  MODELS.PY 
         
-        volume_consomme = donnees_calcul_social[0]
-        prix_unitaire = donnees_calcul_social[1]
-        
-        montant_mois = volume_consomme * prix_unitaire
-        return montant_mois + self._solde_impaye
-
-
-class AbonneCommercial(Abonne):
-    """Classe représentant un abonné soumis au tarif commercial."""
-
-    def calculer_facture(self):
-        """Calcule la facture commerciale avec taxe fixe de maintenance.
-
-        DEMONSTRATION DU POLYMORPHISME : Surcharge de la méthode parent.
-        EXIGENCE BIT (TUPLE) : Utilisation d'un tuple pour regrouper les paramètres.
-
-        Retour:
-            float: Le montant total dû en Francs CFA.
-        """
-        # Regroupement des constantes de facturation dans un tuple structurel
-        parametres_facturation = (config.TARIF_COMMERCIAL, config.TAXE_MAINTENANCE)
-        
-        tarif_unitaire = parametres_facturation[0]
-        taxe_fixe = parametres_facturation[1]
-        
-        volume_consomme = self.calculer_consommation()
-        montant_mois = (volume_consomme * tarif_unitaire) + taxe_fixe
-        return montant_mois + self._solde_impaye
-
-#  FIN DU CODE DE MODELS.PY VERROUILLÉ
