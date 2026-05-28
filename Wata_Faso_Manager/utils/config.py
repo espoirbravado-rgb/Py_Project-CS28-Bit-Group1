@@ -1,31 +1,30 @@
-# CODE PYTHON CORRIGÉ PEP8 POUR CONFIG.PY
+#  CONFIG.PY
 
-"""Module de configuration globale pour l'application WattaFaso-Manager.
+"""Global configuration module for the WattaFaso-Manager application.
 
-Ce module centralise toutes les constantes logistiques, les tarifs
-et les chemins des fichiers de persistance du réseau.
 """
+
+
 
 import os
 
-# Création automatique du dossier s'il n'existe pas
-DOSSIER_DATA = "données"
-if not os.path.exists(DOSSIER_DATA):
-    os.makedirs(DOSSIER_DATA)
+# Automatic creation of the folder if it does not exist
+DATA_FOLDER = "data"
+if not os.path.exists(DATA_FOLDER):
+    os.makedirs(DATA_FOLDER)
 
-# Chemins mis à jour vers le sous-dossier
-CHEMIN_STOCK = os.path.join(DOSSIER_DATA, "abonnés.txt")
-CHEMIN_HISTORIQUE = os.path.join(DOSSIER_DATA, "historique.txt")
+# Updated paths to the subfolder
 
-TARIF_SOCIAL = 250
-TARIF_COMMERCIAL = 450
-TAXE_MAINTENANCE = 1000
+STOCK_PATH = os.path.join(DATA_FOLDER, "subscribed.txt")
+HISTORY_PATH = os.path.join(DATA_FOLDER, "history.txt")
 
-SEUIL_CONSO_MAX = 500
+SOCIAL_RATE = 250
+COMMERCIAL_RATE = 450
+MAINTENANCE_TAX = 1000
 
-# Variables d'innovation pour la gestion logistique du carburant
-STOCK_CARBURANT_LITRES = 150
-SEUIL_CRITIQUE_CARBURANT = 30
+MAX_CONSUMPTION_LIMIT = 500
 
-# FIN DU CODE DE CONFIG.PY
+FUEL_STOCK_LITERS  = 150
+CRITICAL_FUEL_THRESHOLD  = 30
 
+# END OF CONFIG.PY CODE
