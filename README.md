@@ -174,7 +174,7 @@ To exit the application safely:
 
 | Member | GitHub |
 |---|---|
-| AKPATSI Kossi Magloire | [@espoirbravado-rgb](https://github.com/azizbatiana46-cell) |
+| AKPATSI Kossi Magloire | [@espoirbravado-rgb](https://github.com/espoirbravado-rgb) |
 | BAGNAN Sonia | [@soniabagnan-commits](https://github.com/soniabagnan-commits) |
 | BAGUEYA Bibata | [@pseudo3](https://github.com/pseudo3) |
 | BALBONE Arielle Naomie | [@pseudo4](https://github.com/pseudo4) |
