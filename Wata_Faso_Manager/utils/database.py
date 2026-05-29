@@ -1,107 +1,170 @@
-# SECURE AND HARDENED DATABASE.PY PYTHON CODE
+# DATABASE.PY
 
-"""Data persistence management module for WattaFaso-Manager.
+"""Data persistence management module for WattaFaso-Manager."""
 
-This module handles reading and writing the registry with strict 
-column validation to prevent IndexError-type crashes.
-"""
-
-import config
-import models
+from utils import config
+from models import models
 
 
-def charger_base_de_donnees():
-    """Loads the subscriber registry from the text storage file.
+def load_database():
+    """Loads the subscriber registry from the text storage file."""
 
-    Internal security: Explicitly validates the 6-column structure of each
-    line before accessing data, avoiding crashes on corrupted files.
+    client_dictionary = {}
 
-    Returns:
-        dict: The dictionary of subscriber objects indexed by their unique code.
-    """
-    dictionnaire_clients = {}
-    
     try:
-        with open(config.CHEMIN_STOCK, "r", encoding="utf-8") as fichier:
-            for numero_ligne, ligne in enumerate(fichier, 1):
-                ligne_nettoyee = ligne.strip()
-                if not ligne_nettoyee:
+
+        with open(
+            config.STOCK_PATH,
+            "r",
+            encoding="utf-8"
+        ) as file:
+
+            for line_number, line in enumerate(file, 1):
+
+                cleaned_line = line.strip()
+
+                if not cleaned_line:
                     continue
-                    
-                segments = ligne_nettoyee.split(";")
-                
-                # CRITICAL FIX C: Explicit structure validation
+
+                segments = cleaned_line.split(";")
+
+                # CRITICAL FIX C:
+                # Explicit structure validation
                 if len(segments) != 6:
+
                     print(
-                        "Error Line " + str(numero_ligne) 
-                        + " : Invalid structure (" + str(len(segments)) 
-                        + "/6 columns). Line ignored."
+                        "Error Line "
+                        + str(line_number)
+                        + ": Invalid structure ("
+                        + str(len(segments))
+                        + "/6 columns). "
+                        + "Line ignored."
                     )
+
                     continue
-                    
+
                 try:
-                    type_client = segments[0]
-                    identifiant = segments[1]
-                    nom_client = segments[2]
-                    ancien = int(segments[3])
-                    nouveau = int(segments[4])
-                    solde = float(segments[5])
-                    
-                    if type_client == "SOCIAL":
-                        client_objet = models.AbonneSocial(
-                            identifiant, nom_client, ancien, nouveau, solde
+
+                    client_type = segments[0]
+                    identifier = segments[1]
+                    client_name = segments[2]
+
+                    previous_index = int(segments[3])
+                    current_index = int(segments[4])
+
+                    balance = float(segments[5])
+
+                    if client_type == "SOCIAL":
+
+                        client_object = (
+                            models.SocialSubscriber(
+                                identifier,
+                                client_name,
+                                previous_index,
+                                current_index,
+                                balance
+                            )
                         )
-                        dictionnaire_clients[identifiant] = client_objet
-                    elif type_client == "COMMERCIAL":
-                        client_objet = models.AbonneCommercial(
-                            identifiant, nom_client, ancien, nouveau, solde
+
+                        client_dictionary[
+                            identifier
+                        ] = client_object
+
+                    elif client_type == "COMMERCIAL":
+
+                        client_object = (
+                            models.CommercialSubscriber(
+                                identifier,
+                                client_name,
+                                previous_index,
+                                current_index,
+                                balance
+                            )
                         )
-                        dictionnaire_clients[identifiant] = client_objet
+
+                        client_dictionary[
+                            identifier
+                        ] = client_object
+
                     else:
+
                         print(
-                            "Warning Line " + str(numero_ligne) 
-                            + " : Unknown subscriber type '" + str(type_client) + "'."
+                            "Warning Line "
+                            + str(line_number)
+                            + ": Unknown subscriber type '"
+                            + str(client_type)
+                            + "'."
                         )
-                        
+
                 except ValueError:
-                    print("Error Line " + str(numero_ligne) + " : Corrupted numerical data.")
+
+                    print(
+                        "Error Line "
+                        + str(line_number)
+                        + ": Corrupted numeric data."
+                    )
+
                     continue
-                    
+
     except FileNotFoundError:
-        print("Note: Storage file not found. It will be created automatically.")
-        
-    return dictionnaire_clients
+
+        print(
+            "Note: Storage file not found. "
+            "It will be created automatically."
+        )
+
+    return client_dictionary
 
 
-def sauvegarder_base_de_donnees(dictionnaire_clients):
-    """Saves the current state of the dictionary to the storage file.
+def save_database(client_dictionary):
+    """Saves the current state of the dictionary to the storage file."""
 
-    Arguments:
-        dictionnaire_clients (dict): The dictionary of subscribers in memory.
-    """
     try:
-        with open(config.CHEMIN_STOCK, "w", encoding="utf-8") as fichier:
-            for cle in dictionnaire_clients:
-                client = dictionnaire_clients[cle]
-                
-                if isinstance(client, models.AbonneSocial):
-                    etiquette = "SOCIAL"
-                elif isinstance(client, models.AbonneCommercial):
-                    etiquette = "COMMERCIAL"
-                else:
-                    continue
-                    
-                ligne = (
-                    etiquette + ";"
-                    + client.obtenir_code() + ";"
-                    + client.obtenir_nom() + ";"
-                    + str(client.obtenir_ancien_index()) + ";"
-                    + str(client.obtenir_nouvel_index()) + ";"
-                    + str(client.obtenir_solde()) + "\n"
-                )
-                fichier.write(ligne)
-                
-    except IOError:
-        print("Critical error: Unable to write data to disk.")
 
-#  END OF DATABASE.PY CODE
+        with open(
+            config.STOCK_PATH,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            for key in client_dictionary:
+
+                client = client_dictionary[key]
+
+                if isinstance(
+                    client,
+                    models.SocialSubscriber
+                ):
+
+                    label = "SOCIAL"
+
+                elif isinstance(
+                    client,
+                    models.CommercialSubscriber
+                ):
+
+                    label = "COMMERCIAL"
+
+                else:
+
+                    continue
+
+                line = (
+                    label + ";"
+                    + client.get_code() + ";"
+                    + client.get_name() + ";"
+                    + str(client.get_previous_index()) + ";"
+                    + str(client.get_current_index()) + ";"
+                    + str(client.get_balance()) + "\n"
+                )
+
+                file.write(line)
+
+    except IOError:
+
+        print(
+            "Critical error: Unable to write data to disk."
+        )
+
+
+# END OF DATABASE.PY 
