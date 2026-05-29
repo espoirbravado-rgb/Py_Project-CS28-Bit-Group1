@@ -1,119 +1,168 @@
-#  CODE PYTHON DU FICHIER SERVICES.PY CONFORME CAHIER DES CHARGES BIT
+# SERVICES.PY 
 
-"""Module des services analytiques et de reporting pour WattaFaso-Manager.
+"""Analytics and reporting services module for WattaFaso-Manager."""
 
-Ce module applique les corrections logiques pour l'analyse anti-fraude, gère la
-liste centrale des incidents et génère les statistiques du Tableau de Bord.
-"""
-
-import config
-
-# EXIGENCE BIT (LIST) : Liste centrale mémorisant l'historique des anomalies détectées
-registre_alertes_fraude = []
+from utils import config
 
 
-def enregistrer_et_imprimer_rapport(panier_factures):
-    """Enregistre l'historique des encaissements de la session sur le disque.
+# Central list storing detected fraud/anomaly alerts
+fraud_alert_registry = []
 
-    Arguments:
-        panier_factures (list): Liste de tuples (client, volume, versement).
-    """
-    if not panier_factures:
+
+def save_and_print_report(invoice_cart):
+    """Saves the session payment history to disk."""
+
+    if not invoice_cart:
         return
-        
+
     try:
-        with open(config.CHEMIN_HISTORIQUE, "a", encoding="utf-8") as fichier:
-            fichier.write("\n--- RAPPORT CHRONOLOGIQUE D'ENCAISSEMENT ---\n")
-            for element in panier_factures:
+        with open(config.HISTORY_PATH, "a", encoding="utf-8") as file:
+
+            file.write(
+                "\n--- CHRONOLOGICAL PAYMENT REPORT ---\n"
+            )
+
+            for element in invoice_cart:
+
                 client = element[0]
-                versement = element[2]
-                fichier.write(
-                    "Client : " + client.obtenir_nom() 
-                    + " | Reçu : " + str(versement) + " F CFA.\n"
+                payment = element[2]
+
+                file.write(
+                    "Client: "
+                    + client.get_name()
+                    + " | Received: "
+                    + str(payment)
+                    + " CFA Francs.\n"
                 )
+
     except IOError:
-        print("Erreur critique : Impossible d'écrire le rapport sur le disque.")
+
+        print(
+            "Critical error: Unable to write report to disk."
+        )
 
 
-def executer_analyse_anti_fraude(dictionnaire_clients):
-    """L'OPTION 4 : Analyse des suspicions de fraudes et des impayés du réseau.
-
-    EXIGENCE BIT (LIST) : Alimentation dynamique d'une liste à l'aide de .append()
-    pour mémoriser les alertes de consommation excessive de manière centralisée.
-
-    Arguments:
-        dictionnaire_clients (dict): Le dictionnaire des abonnés en mémoire.
+def run_anti_fraud_analysis(client_dictionary):
+    """OPTION 4:
+    Analysis of fraud suspicions and unpaid balances.
     """
-    print("\n--- ANALYSE ANTI-FRAUDE ET ALERTES ---")
-    
-    # Réinitialisation de la liste pour la nouvelle analyse
-    registre_alertes_fraude.clear()
-    
-    for cle in dictionnaire_clients:
-        client = dictionnaire_clients[cle]
-        consommation = client.calculer_consommation()
-        
-        if consommation > config.SEUIL_CONSO_MAX:
-            texte_alerte = "Alerte de surconsommation pour le client " + client.obtenir_nom()
-            
-            # Utilisation significative de la méthode append sur notre liste globale
-            registre_alertes_fraude.append(texte_alerte)
-            
-            print(
-                "⚠️ ALERT CONSO MAXIMUM DEPASSÉE : " 
-                + client.obtenir_nom() + " (" + str(consommation) + " unités)."
+
+    print(
+        "\n--- ANTI-FRAUD ANALYSIS AND ALERTS ---"
+    )
+
+    # Reset the list for a new analysis
+    fraud_alert_registry.clear()
+
+    for key in client_dictionary:
+
+        client = client_dictionary[key]
+
+        consumption = client.calculate_consumption()
+
+        if consumption > config.MAX_CONSUMPTION_LIMIT:
+
+            alert_text = (
+                "Overconsumption alert for client "
+                + client.get_name()
             )
-            
-        if client.obtenir_solde() > 0:
+
+            # Meaningful use of append()
+            fraud_alert_registry.append(alert_text)
+
             print(
-                "ℹ️ ALERTE IMPAYÉ : " 
-                + client.obtenir_nom() + " doit " + str(client.obtenir_solde()) + " F CFA."
+                "⚠️ MAXIMUM CONSUMPTION ALERT: "
+                + client.get_name()
+                + " ("
+                + str(consumption)
+                + " units)."
             )
-            
-    if not registre_alertes_fraude:
-        print("Félicitations : Aucune anomalie détectée sur les compteurs du réseau.")
+
+        if client.get_balance() > 0:
+
+            print(
+                "ℹ️ UNPAID BALANCE ALERT: "
+                + client.get_name()
+                + " owes "
+                + str(client.get_balance())
+                + " CFA Francs."
+            )
+
+    if not fraud_alert_registry:
+
+        print(
+            "Congratulations: No anomalies detected "
+            "on network meters."
+        )
 
 
-def afficher_tableau_de_bord_global(dictionnaire_clients):
-    """L'OPTION 6 : Tableau de bord de supervision macroscopique et logistique.
-
-    EXIGENCE BIT (LIST) : Lecture et exploitation de la liste registre_alertes_fraude
-    pour extraire des indicateurs volumétriques (utilisation de la fonction len()).
-
-    Arguments:
-        dictionnaire_clients (dict): Le dictionnaire des abonnés en mémoire.
+def display_global_dashboard(client_dictionary):
+    """OPTION 6:
+    Global supervision and logistics dashboard.
     """
+
     print("\n==================================================")
-    print("   OPTION 6 : TABLEAU DE BORD DE SUPERVISION")
-    print("==================================================")
-    
-    # Contrôle logistique du carburant
-    if config.STOCK_CARBURANT_LITRES <= config.SEUIL_CRITIQUE_CARBURANT:
-        print(
-            "⚠️ LOGISTIQUE : Stock de carburant CRITIQUE (" 
-            + str(config.STOCK_CARBURANT_LITRES) + " L) !"
-        )
-    else:
-        print(
-            "✅ LOGISTIQUE : Stock de carburant stable (" 
-            + str(config.STOCK_CARBURANT_LITRES) + " L)."
-        )
-        
-    volume_total_distribue = 0
-    total_impayes_nature = 0
-    
-    for cle in dictionnaire_clients:
-        client = dictionnaire_clients[cle]
-        volume_total_distribue += client.calculer_consommation()
-        total_impayes_nature += client.obtenir_solde()
-        
-    print("\n--- STATISTIQUES GLOBALES DE PERFORMANCE ---")
-    print("- Volume total injecté sur le réseau : " + str(volume_total_distribue) + " unités.")
-    print("- Total des arriérés non recouvrés : " + str(total_impayes_nature) + " F CFA.")
-    
-    # EXIGENCE BIT (LIST) : Utilisation de la liste pour afficher une statistique clé
-    nombre_incidents = len(registre_alertes_fraude)
-    print("- Nombre d'anomalies de consommation en mémoire : " + str(nombre_incidents))
+    print("      OPTION 6: GLOBAL SUPERVISION DASHBOARD")
     print("==================================================")
 
-#  FIN DU CODE DE SERVICES.PY VERROUILLÉ
+    # Fuel logistics monitoring
+    if (
+        config.FUEL_STOCK_LITERS
+        <= config.CRITICAL_FUEL_THRESHOLD
+    ):
+
+        print(
+            "⚠️ LOGISTICS: CRITICAL fuel stock ("
+            + str(config.FUEL_STOCK_LITERS)
+            + " L)!"
+        )
+
+    else:
+
+        print(
+            "✅ LOGISTICS: Stable fuel stock ("
+            + str(config.FUEL_STOCK_LITERS)
+            + " L)."
+        )
+
+    total_distributed_volume = 0
+    total_unpaid_amount = 0
+
+    for key in client_dictionary:
+
+        client = client_dictionary[key]
+
+        total_distributed_volume += (
+            client.calculate_consumption()
+        )
+
+        total_unpaid_amount += (
+            client.get_balance()
+        )
+
+    print("\n--- GLOBAL PERFORMANCE STATISTICS ---")
+
+    print(
+        "- Total volume distributed on the network: "
+        + str(total_distributed_volume)
+        + " units."
+    )
+
+    print(
+        "- Total unpaid arrears: "
+        + str(total_unpaid_amount)
+        + " CFA Francs."
+    )
+
+    # Using the list to display a key statistic
+    number_of_incidents = len(fraud_alert_registry)
+
+    print(
+        "- Number of consumption anomalies in memory: "
+        + str(number_of_incidents)
+    )
+
+    print("==================================================")
+
+
+# END OF SERVICES.PY
