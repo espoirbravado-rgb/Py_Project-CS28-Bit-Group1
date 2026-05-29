@@ -121,8 +121,8 @@ Internal complexity is hidden behind simple methods to provide a clear and user-
 A parent class named `Abonne` is used to centralize shared behaviors.
 
 Two specialized classes inherit from this parent class:
-- `AbonneSocial`
-- `AbonneCommercial`
+- `SocialSubscriber`
+- `CommercialSubscriber`
 
 ## 4. Polymorphism
 The `calculer_facture()` method is redefined in each class to apply different billing rules depending on the subscriber type.
