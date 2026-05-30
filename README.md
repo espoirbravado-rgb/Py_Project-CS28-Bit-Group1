@@ -186,7 +186,7 @@ To exit the application safely:
 ## 👥 Member Contributions
 The distribution of tasks was organized by modules and specific responsibilities to ensure architectural consistency and professional delivery:
 
-- **AKPATSI Kossi Magloire (Lead Developer)**: Software architecture, package management, development of `main.py` (entry point), technical drafting of the `README.md`, and content creation for the PowerPoint presentation.
+- **AKPATSI Kossi Magloire **: Software architecture, package management, development of `main.py` (entry point), technical drafting of the `README.md`, and content creation for the PowerPoint presentation.
 - **BATIANA Abdoul Aziz**: Data persistence and file management (`database.py`), and Visual Designer of the PowerPoint presentation.
 - **BAGNAN Sonia**: Development of business logic and operation modules (`operations.py`, `services.py`).
 - **BAGUEYA Bibata**: System configuration (`config.py`) and PEP 8 style compliance.
