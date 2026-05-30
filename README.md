@@ -1,5 +1,5 @@
 # Py_Project-CS28-Bit-Group1
-# WattaFaso-Manager (V1.3.5)
+# WattaFaso-Manager 
 ## Water Distribution Network Management System
 
 ---
